@@ -1,0 +1,18 @@
+{
+  "work_num": 2,
+  "work_list": [
+    {
+      "id": "9850ac",
+      "name": "jd_man",
+      "downloader": [
+        {
+          "type": "select",
+          "proxy": {
+            "host": "127.0.0.1:1080",
+            "type": "socks5"
+          }
+        }
+      ]
+    }
+  ]
+}

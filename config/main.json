@@ -6,13 +6,15 @@
       "name": "jd_man",
       "downloader": [
         {
-          "type": "select",
+          "type": "selenium",
           "proxy": {
             "host": "127.0.0.1:1080",
             "type": "socks5"
           }
         }
-      ]
+      ],
+      "explain":"jd",
+      "parse_thread":2
     }
   ]
 }

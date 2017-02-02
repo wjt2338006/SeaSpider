@@ -7,8 +7,8 @@ class Downloader:
         if self.type == 'selenium':
             s_args = []
             if 'proxy' in config:
-                s_args.append("--proxy=%"%config["proxy"]["host"])
-                s_args.append("--proxy-type=%" % config["proxy"]["type"])
+                s_args.append("--proxy=%s"%config["proxy"]["host"])
+                s_args.append("--proxy-type=%s" % config["proxy"]["type"])
 
             self.dirver = webdriver.PhantomJS(bin_path, service_args=s_args)
     def get(self,url):

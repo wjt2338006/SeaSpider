@@ -12,10 +12,10 @@ class Config:
         r = self.config
 
         for i in key_list:
-            if isinstance(r,list):
+            if isinstance(r, list):
                 r = r[int(i)]
             else:
-                r= r[i]
+                r = r[i]
         return r
 
     def reload(self):
@@ -23,11 +23,7 @@ class Config:
         self.config = json.loads(config_file.read())
 
 
-
-
-
 if __name__ == "__main__":
-
     c = Config('../config/main.json')
     r = c.get('work_list.0.id')
     print(r)

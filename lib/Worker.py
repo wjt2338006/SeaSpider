@@ -1,5 +1,6 @@
 import threading
 
+from app import jd
 from lib.Channel import *
 from lib.Downloader import Downloader
 
@@ -17,6 +18,7 @@ class Worker:
         self.downloader = []
         self.now_downloader = -1
         for i in self.config["downloader"]:
+            print(i)
             d = Downloader(i)
             self.downloader.append(d)
 
@@ -74,9 +76,9 @@ class Worker:
     def handle_result(self, parse):
         while self.is_run:
             data = self.result_queue.get()
-            result, type = parse(data.data, data.type)
-            if result is not None and result is not False:
-                self.push_result(result, type)
+            for (result, data_type) in parse(data.data, data.type, self):
+                if result is not None and result is not False:
+                    self.push_result(result, data_type)
 
     # 运行,派出一个线程监控主线程消息,后自己进行url处理
     def run(self):
@@ -96,3 +98,26 @@ class Worker:
         for i in parse_thread:
             i.join()
         print("线程安全停止")
+
+
+if __name__ == "__main__":
+    config = {
+        "id": "9850ac",
+        "name": "jd_man",
+        "downloader": [
+            {
+                "type": "selenium",
+                "proxy": {
+                    "host": "127.0.0.1:1080",
+                    "type": "socks5"
+                }
+            }
+        ],
+        "explain": "jd",
+        "parse_thread": 2
+    }
+    channel = Channel()
+    work = Worker(config, channel)
+    work.channel.put(URL_ADD, "www.jtcool.com")
+    work.run()
+

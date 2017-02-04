@@ -15,7 +15,7 @@ class Config:
             if isinstance(r, list):
                 r = r[int(i)]
             else:
-                r = r[i]
+                r = r[str(i)]
         return r
 
     def reload(self):

@@ -2,7 +2,7 @@ from selenium import webdriver
 
 
 class Downloader:
-    def __init__(self,config,bin_path='/usr/local/bin/phantomjs'):
+    def __init__(self, config, bin_path='/usr/local/bin/phantomjs'):
         self.type = config['type'] # 选择下载器类型
         if self.type == 'selenium':
             s_args = []

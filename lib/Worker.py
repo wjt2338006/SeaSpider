@@ -24,6 +24,8 @@ class Worker:
 
         self.result_queue = queue.Queue
 
+        self.thread = None
+
     # 获取传输信道
     def get_channel(self):
         return self.channel
@@ -82,22 +84,30 @@ class Worker:
 
     # 运行,派出一个线程监控主线程消息,后自己进行url处理
     def run(self):
-        self.is_run = True
-        monitor = threading.Thread(target=self.monitor)
-        monitor.run()
+        def true_run():
+            self.is_run = True
+            monitor = threading.Thread(target=self.monitor)
+            monitor.run()
 
-        module = __import__(self.config["explain"])
-        parse_thread = []
-        for i in range(0, self.config["parse_thread"]):
-            x = threading.Thread(target=lambda: self.handle_result(module.parse)).run()
-            parse_thread.append(x)
+            module = __import__(self.config["explain"])
+            parse_thread = []
+            for i in range(0, self.config["parse_thread"]):
+                x = threading.Thread(target=lambda: self.handle_result(module.parse)).run()
+                parse_thread.append(x)
 
-        self.handle_url()
+            self.handle_url()
 
-        monitor.join()
-        for i in parse_thread:
-            i.join()
-        print("线程安全停止")
+            monitor.join()
+            for i in parse_thread:
+                i.join()
+            print("线程安全停止")
+
+        self.thread = threading.Thread(target=true_run).run() #防止阻塞主线程
+        return self.thread
+
+    def join(self):
+        if self.thread != None:
+            self.thread.join()
 
 
 if __name__ == "__main__":
@@ -120,4 +130,3 @@ if __name__ == "__main__":
     work = Worker(config, channel)
     work.channel.put(URL_ADD, "www.jtcool.com")
     work.run()
-

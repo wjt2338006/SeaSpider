@@ -1,1 +1,0 @@
-url_jd = 'jd_url'

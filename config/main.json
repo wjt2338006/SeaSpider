@@ -1,5 +1,5 @@
 {
-  "work_num": 2,
+  "work_num": 1,
   "work_list": [
     {
       "id": "9850ac",
@@ -13,8 +13,8 @@
           }
         }
       ],
-      "explain":"jd",
-      "parse_thread":2
+      "explain":"app.jd",
+      "parse_thread":1
     }
   ]
 }

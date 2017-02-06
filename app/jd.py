@@ -6,19 +6,44 @@ from bs4 import BeautifulSoup
 
 
 def parse(data, type, worker_obj):
-    print("我调用了jd parse")
-    # if type == TYPE_LIST_PAGE:
-    #     parse_list_page(data,worker_obj)
-    # if type == TYPE_SINGLE_GOODS:
-    #     parse_single_goods(data,worker_obj)
+    if type == TYPE_LIST_PAGE or type == None:
+        data = BeautifulSoup(data, "lxml")
+        result_list = data.find_all(name="li", class_="gl-item")
+        for k in range(0, len(result_list)):
+            i = result_list[k]
+            # print([str(i)])
+            yield (str(i), TYPE_SINGLE_GOODS)
+        # r =  parse_list_page(data,worker_obj)
+        # print(r)
+        # return  r
+    if type == TYPE_SINGLE_GOODS:
+        html = BeautifulSoup(data, 'html5lib').find(name="li")
+
+        data = {}
+        data["jd_id"] = ""
+        data["name"] = ""
+        try:
+            name_div = html.find(name="div", class_="p-name")
+            data["name"] = name_div.a.em.get_text()
+
+            data["price"] = html.find(name="div", class_="p-price").strong.i.get_text()
+            data["detail_url"] = name_div.a["href"]
+            data["jd_id"] = html["data-spu"]
+            data["seller_name"] = explain_shop(html, data)
+            # data["order"] = index
+            print(data)#已经提取到了数据
+            return (False,False)
+        except Exception as e:
+            print('解析错误' + str(e))
+            #traceback.print_exc(e)
 
 
 def parse_list_page(data,worker_obj):
     data = BeautifulSoup(data, "lxml")
     result_list = data.find_all(name="li", class_="gl-item")
-    print(data)
     for k in range(0, len(result_list)):
         i = result_list[k]
+
         yield (str(i), TYPE_SINGLE_GOODS)
 
 

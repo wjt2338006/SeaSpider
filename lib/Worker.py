@@ -12,17 +12,16 @@ class Worker:
         self.channel.set_handle(URL_ADD, self.signal_url_add)
 
         self.config = config
-        self.url_queue = queue.Queue
+        self.url_queue = queue.Queue()
         self.is_run = False
 
         self.downloader = []
         self.now_downloader = -1
         for i in self.config["downloader"]:
-            print(i)
             d = Downloader(i)
             self.downloader.append(d)
 
-        self.result_queue = queue.Queue
+        self.result_queue = queue.Queue()
 
         self.thread = None
 
@@ -65,34 +64,42 @@ class Worker:
 
     # 自己的url处理循环
     def handle_url(self):
-
+        print("url处理循环")
         while self.is_run:
             r = self.url_queue.get()
-            result_page = self.get_downloader().get(r.url)
+            print("得到了url",r)
+            result_page = self.get_downloader().get(r["url"])
+
             if result_page is not False:
-                self.push_result(result_page, r.type)
+                self.push_result(result_page, r["type"])
             else:
                 print("is false")
 
     # 结果处理循环
     def handle_result(self, parse):
+        print("结果处理循环")
         while self.is_run:
             data = self.result_queue.get()
-            for (result, data_type) in parse(data.data, data.type, self):
+            for (result, data_type) in parse(data["data"], data["type"], self):
+                print(["结果",result])
                 if result is not None and result is not False:
                     self.push_result(result, data_type)
 
     # 运行,派出一个线程监控主线程消息,后自己进行url处理
     def run(self):
         def true_run():
+            print("worker运行")
             self.is_run = True
             monitor = threading.Thread(target=self.monitor)
-            monitor.run()
+            monitor.start()
 
-            module = __import__(self.config["explain"])
+            module = __import__(self.config["explain"],fromlist=True)
             parse_thread = []
             for i in range(0, self.config["parse_thread"]):
-                x = threading.Thread(target=lambda: self.handle_result(module.parse)).run()
+                func = getattr(module, "parse")
+
+                x = threading.Thread(target=lambda: self.handle_result(func))
+                x.start()
                 parse_thread.append(x)
 
             self.handle_url()
@@ -102,7 +109,9 @@ class Worker:
                 i.join()
             print("线程安全停止")
 
-        self.thread = threading.Thread(target=true_run).run() #防止阻塞主线程
+        self.thread = threading.Thread(target=true_run)
+        self.thread.start() #防止阻塞主线程
+        print("主线程启动了一个Work子线程")
         return self.thread
 
     def join(self):
@@ -128,5 +137,5 @@ if __name__ == "__main__":
     }
     channel = Channel()
     work = Worker(config, channel)
-    work.channel.put(URL_ADD, "www.jtcool.com")
+    work.channel.put(URL_ADD, "http://www.jtcool.com")
     work.run()

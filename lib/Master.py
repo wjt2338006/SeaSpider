@@ -1,4 +1,7 @@
-from lib.Channel import Channel, URL_ADD
+import signal
+
+from lib.Channel import Channel, URL_ADD, STOP_RUN
+from lib.Proxy import Proxy
 from lib.Worker import Worker
 from lib.Config import Config
 
@@ -11,8 +14,9 @@ class Master:
         self.worker_num = self.config.get('work_num')
         self.worker_pool = []
 
-    def run(self):
 
+
+    def run(self):
         # 运行几个worker,让他们监听channel
         work_list = self.config.get('work_list')
         if len(work_list) != self.worker_num:
@@ -33,8 +37,14 @@ class Master:
                 "id": id,
                 "obj": work, "thread": thread
             })
+    def run_proxy(self):
+        self.proxy_list = Proxy(self.config.get("proxy"))
+        self.proxy_list.run()
+
+
 
 
 if __name__ == "__main__":
     m = Master("../config/main.json")
+    m.run_proxy()
     m.run()

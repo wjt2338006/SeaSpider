@@ -1,5 +1,6 @@
 import json
 import traceback
+from time import sleep, time
 
 import requests
 from bs4 import BeautifulSoup
@@ -32,6 +33,7 @@ def parse(data, type, worker_obj):
             data["seller_name"] = explain_shop(html, data)
             # data["order"] = index
             print(data)#已经提取到了数据
+            push_to_jd(data)
             return (False,False)
         except Exception as e:
             print('解析错误' + str(e))
@@ -70,13 +72,11 @@ def parse_single_goods(html_data,worker_obj):
 
 
 def explain_shop(div,data):
-    seller_name = ""
+    seller_name = "自营"
     try:
         seller_name = div.find(name="div", class_="p-shop").span.a["title"]
         return str(seller_name)
     except Exception as e:
-        print("seller_name 无法找到")
-        seller_name = ""
         return str(seller_name)
 
 TYPE_LIST_PAGE = 1
@@ -84,7 +84,7 @@ TYPE_SINGLE_GOODS = 2
 
 
 def push_to_jd(data):
-    url = "http://127.0.0.12/api/input"
+    url = "http://laravel_template.com/api/input"
     sendData = {"param": {
         'api': "pushJdData"
     }}
@@ -102,6 +102,18 @@ def push_to_jd(data):
 
     if result["status"] == 200:
         print('ok,i get some page')
+        sleep(1)
         pass
     else:
         print('server error')
+
+
+def after_get(dirver,worker):
+    n = 0
+    while n<10:
+        print('完成后点击了下一页')
+        dirver.find_element_by_class_name('pn-next').click()
+        sleep(5)
+        worker.push_result(str(dirver.page_source),None)
+        print("推入了结果")
+        n+=1

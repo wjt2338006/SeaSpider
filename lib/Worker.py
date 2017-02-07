@@ -24,8 +24,9 @@ class Worker:
         self.result_queue = queue.Queue()
 
         self.thread = None
+        self.after_get=None
 
-    # 获取传输信道
+        # 获取传输信道
     def get_channel(self):
         return self.channel
 
@@ -68,7 +69,7 @@ class Worker:
         while self.is_run:
             r = self.url_queue.get()
             print("得到了url",r)
-            result_page = self.get_downloader().get(r["url"])
+            result_page = self.get_downloader().get(r["url"],self.after_get,self)
 
             if result_page is not False:
                 self.push_result(result_page, r["type"])
@@ -93,7 +94,11 @@ class Worker:
             monitor = threading.Thread(target=self.monitor)
             monitor.start()
 
+            #拿到解析函数解析
             module = __import__(self.config["explain"],fromlist=True)
+            if "after_get" in self.config:
+                self.after_get = getattr(module,self.config["after_get"])
+
             parse_thread = []
             for i in range(0, self.config["parse_thread"]):
                 func = getattr(module, "parse")

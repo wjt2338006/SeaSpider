@@ -8,13 +8,31 @@
         {
           "type": "selenium",
           "proxy": {
-            "host": "127.0.0.1:1080",
+            "host": "127.0.0.2:1080",
             "type": "socks5"
           }
         }
       ],
-      "explain":"app.jd",
-      "parse_thread":1
+      "explain": "app.jd",
+      "parse_thread": 1,
+      "after_get":"after_get"
+    }
+  ],
+  "proxy": [
+    {
+      "name": "hongkong",
+      "config": "../config/hongkong.json",
+      "type": "socks5"
+    },
+    {
+      "name": "cn_1",
+      "config": "../config/cn_revert1.json",
+      "type": "socks5"
+    },
+    {
+      "name": "cn_2",
+      "config": "../config/cn_revert2.json",
+      "type": "socks5"
     }
   ]
 }

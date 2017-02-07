@@ -117,3 +117,4 @@ def after_get(dirver,worker):
         worker.push_result(str(dirver.page_source),None)
         print("推入了结果")
         n+=1
+

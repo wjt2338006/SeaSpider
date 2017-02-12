@@ -50,11 +50,11 @@ class Worker:
 
         return self.downloader[self.now_downloader]
 
-    def push_next_url(self, url, type=None):
-        self.url_queue.put({"url": url, "type": type})
+    def push_next_url(self, url, type=None,other={}):
+        self.url_queue.put({"url": url, "type": type,"other":other})
 
-    def push_result(self, data, type):
-        self.result_queue.put({"data": data, "type": type})
+    def push_result(self, data, type=None, other={}):
+        self.result_queue.put({"data": data, "type": type,"other":other})
 
     # 监控主线程的消息
     def monitor(self):
@@ -64,27 +64,24 @@ class Worker:
                 break
 
     # 自己的url处理循环
-    def handle_url(self):
+    def handle_url(self,handle_func):
         print("url处理循环")
         while self.is_run:
-            r = self.url_queue.get()
-            print("得到了url",r)
-            result_page = self.get_downloader().get(r["url"],self.after_get,self)
-
-            if result_page is not False:
-                self.push_result(result_page, r["type"])
-            else:
-                print("is false")
+            get_url_data = self.url_queue.get()
+            for result in handle_func(self.get_downloader(), get_url_data,{}): # other留着以后使用
+                if result is not False:
+                    self.push_result(result["data"], result["type"], result["other"])
+                else:
+                    print("is false")
 
     # 结果处理循环
     def handle_result(self, parse):
         print("结果处理循环")
         while self.is_run:
             data = self.result_queue.get()
-            for (result, data_type) in parse(data["data"], data["type"], self):
-                print(["结果",result])
+            for (result, data_type, other) in parse(data["data"], data["type"], data["other"], self):
                 if result is not None and result is not False:
-                    self.push_result(result, data_type)
+                    self.push_result(result, data_type, other)
 
     # 运行,派出一个线程监控主线程消息,后自己进行url处理
     def run(self):
@@ -94,20 +91,21 @@ class Worker:
             monitor = threading.Thread(target=self.monitor)
             monitor.start()
 
-            #拿到解析函数解析
-            module = __import__(self.config["explain"],fromlist=True)
+            # 拿到解析函数解析
+            module = __import__(self.config["explain"], fromlist=True)
             if "after_get" in self.config:
                 self.after_get = getattr(module,self.config["after_get"])
 
             parse_thread = []
             for i in range(0, self.config["parse_thread"]):
-                func = getattr(module, "parse")
+                parse_func = getattr(module, "parse")
 
-                x = threading.Thread(target=lambda: self.handle_result(func))
+                x = threading.Thread(target=lambda: self.handle_result(parse_func))
                 x.start()
                 parse_thread.append(x)
 
-            self.handle_url()
+            handle_func = getattr(module,"handle")
+            self.handle_url(handle_func)
 
             monitor.join()
             for i in parse_thread:

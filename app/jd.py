@@ -6,6 +6,16 @@ import requests
 from bs4 import BeautifulSoup
 
 
+def handle(download, get_url_data, other):
+    try:
+        download.driver.get(get_url_data["url"])
+        data = download.dirver.page_source
+        yield (str(data), None, {"page": 1})
+    except Exception as e:
+        print(e)
+        return False
+
+
 def parse(data, type, worker_obj):
     if type == TYPE_LIST_PAGE or type == None:
         data = BeautifulSoup(data, "lxml")
@@ -13,10 +23,10 @@ def parse(data, type, worker_obj):
         for k in range(0, len(result_list)):
             i = result_list[k]
             # print([str(i)])
-            yield (str(i), TYPE_SINGLE_GOODS)
-        # r =  parse_list_page(data,worker_obj)
-        # print(r)
-        # return  r
+            yield (str(i), TYPE_SINGLE_GOODS, {})
+            # r =  parse_list_page(data,worker_obj)
+            # print(r)
+            # return  r
     if type == TYPE_SINGLE_GOODS:
         html = BeautifulSoup(data, 'html5lib').find(name="li")
 
@@ -32,52 +42,22 @@ def parse(data, type, worker_obj):
             data["jd_id"] = html["data-spu"]
             data["seller_name"] = explain_shop(html, data)
             # data["order"] = index
-            print(data)#已经提取到了数据
+            print(data)  # 已经提取到了数据
             push_to_jd(data)
-            return (False,False)
+            return False, False, {}
         except Exception as e:
             print('解析错误' + str(e))
-            #traceback.print_exc(e)
+            # traceback.print_exc(e)
 
 
-def parse_list_page(data,worker_obj):
-    data = BeautifulSoup(data, "lxml")
-    result_list = data.find_all(name="li", class_="gl-item")
-    for k in range(0, len(result_list)):
-        i = result_list[k]
-
-        yield (str(i), TYPE_SINGLE_GOODS)
-
-
-def parse_single_goods(html_data,worker_obj):
-    html = BeautifulSoup(html_data, 'html5lib').find(name="li")
-
-    data = {}
-    data["jd_id"] = ""
-    data["name"] = ""
-    try:
-        name_div = html.find(name="div", class_="p-name")
-        data["name"] = name_div.a.em.get_text()
-
-        data["price"] = html.find(name="div", class_="p-price").strong.i.get_text()
-        data["detail_url"] = name_div.a["href"]
-        data["jd_id"] = html["data-spu"]
-        data["seller_name"] = explain_shop(html, data)
-        # data["order"] = index
-
-    except Exception as e:
-        print('解析错误'+str(e))
-        traceback.print_exc(e)
-
-
-
-def explain_shop(div,data):
+def explain_shop(div, data):
     seller_name = "自营"
     try:
         seller_name = div.find(name="div", class_="p-shop").span.a["title"]
         return str(seller_name)
     except Exception as e:
         return str(seller_name)
+
 
 TYPE_LIST_PAGE = 1
 TYPE_SINGLE_GOODS = 2
@@ -108,13 +88,12 @@ def push_to_jd(data):
         print('server error')
 
 
-def after_get(dirver,worker):
+def after_get(dirver, worker):
     n = 0
-    while n<10:
+    while n < 10:
         print('完成后点击了下一页')
         dirver.find_element_by_class_name('pn-next').click()
         sleep(5)
-        worker.push_result(str(dirver.page_source),None)
+        worker.push_result(str(dirver.page_source), None)
         print("推入了结果")
-        n+=1
-
+        n += 1

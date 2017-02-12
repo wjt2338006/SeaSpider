@@ -16,14 +16,14 @@ class Downloader:
                                                         "like Gecko) Ubuntu Chromium/55.0.2883.87 Chrome/55.0.2883.87" \
                                                         " Safari/537.36 "
 
-            self.dirver = webdriver.PhantomJS(bin_path, service_args=s_args, desired_capabilities=caps)
+            self.driver = webdriver.PhantomJS(bin_path, service_args=s_args, desired_capabilities=caps)
 
     def get(self, url, after_get_page=None,worker=None):
         try:
-            self.dirver.get(url)
-            data = self.dirver.page_source
+            self.driver.get(url)
+            data = self.driver.page_source
             if after_get_page is not None:
-                after_get_page(self.dirver,worker)
+                after_get_page(self.driver,worker)
             if len(data) == 0:
                 raise Exception('error empty page')
             return str(data)

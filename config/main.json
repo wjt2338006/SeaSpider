@@ -1,4 +1,7 @@
 {
+  "kafka_log_host":"127.0.0.1:9092",
+  "kafka_log_topic":"sea_spider_log",
+
   "work_num": 1,
   "work_list": [
     {
@@ -15,7 +18,18 @@
       ],
       "explain": "app.jd",
       "parse_thread": 1,
-      "after_get":"after_get"
+      "after_get":"after_get",
+
+      "url_queue":{
+        "host":"",
+        "topic":"sea_jd_url_queue",
+        "consumer_group":"sea_jd_url_auto"
+      },
+      "result_queue":{
+        "host":"",
+        "topic":"sea_jd_result_queue",
+        "consumer_group":"sea_jd_result_auto"
+      }
     }
   ],
   "proxy": [

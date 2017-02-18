@@ -1,21 +1,14 @@
 from pykafka import KafkaClient
 
+from lib.MsgQueue import MsgQueue
 
-def produce():
+
+def get_topic():
     client = KafkaClient(hosts="127.0.0.1:9092")
-    print(client.topics)
-    topic_name =b"test"
-    topic = client.topics[topic_name]
-    producer  = topic.get_producer()
-
-    msg_list = [("i send message "+str(i)).encode() for i in range(5)]
-    print(msg_list)
-    producer.produce(b"xxsxsxs now is")
-
-def consume():
-    client = KafkaClient(hosts="127.0.0.1:9092")
-    topic = client.topics[topic_name]
-    consumer = topic
-
+    t = client.topics[b"sea_jd_result_queue"]
+    c = t.get_simple_consumer()
+    m = c.consume()
+    print(m.value)
 if __name__ == "__main__":
-    produce()
+    get_topic()
+

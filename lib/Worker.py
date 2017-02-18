@@ -1,32 +1,44 @@
+import json
 import threading
 
-from app import jd
+
 from lib.Channel import *
 from lib.Downloader import Downloader
+from lib.MsgQueue import MsgQueue
 
 
 class Worker:
-    def __init__(self, config, channel):
+    def __init__(self, config, channel, master):
         self.channel = channel
         self.channel.set_handle(STOP_RUN, self.signal_stop_run)
-        self.channel.set_handle(URL_ADD, self.signal_url_add)
+        # self.channel.set_handle(URL_ADD, self.signal_url_add)
 
         self.config = config
-        self.url_queue = queue.Queue()
-        self.is_run = False
 
+        # url接受频道
+        tmp_url_queue = config["url_queue"]
+        self.url_queue = MsgQueue(tmp_url_queue["host"],tmp_url_queue["topic"],tmp_url_queue["consumer_group"])
+
+        # 结果批处理频道
+        tmp_result_queue = config["result_queue"]
+        self.result_queue = MsgQueue(tmp_result_queue["host"],tmp_result_queue["topic"],tmp_result_queue["consumer_group"])
+
+
+        # 下载器初始化
         self.downloader = []
         self.now_downloader = -1
         for i in self.config["downloader"]:
             d = Downloader(i)
             self.downloader.append(d)
 
-        self.result_queue = queue.Queue()
-
+        # 其他变量初始化
+        self.is_run = False
         self.thread = None
         self.after_get=None
+        self.id = self.config["id"]
+        self.master = master
 
-        # 获取传输信道
+
     def get_channel(self):
         return self.channel
 
@@ -34,14 +46,14 @@ class Worker:
     def signal_stop_run(self, data):
         self.is_run = False
         return False
+    #
+    # # 添加url信号
+    # def signal_url_add(self, data):
+    #     if isinstance(data, str):
+    #         self.push_next_url(data)
+    #     return True
 
-    # 添加url信号
-    def signal_url_add(self, data):
-        if isinstance(data, str):
-            self.push_next_url(data)
-        return True
-
-    # 获取下载器
+    # 获取下载器，目前只是按照顺序来获取
     def get_downloader(self):
         if self.now_downloader >= len(self.downloader) - 1:
             self.now_downloader = 0
@@ -49,12 +61,9 @@ class Worker:
             self.now_downloader += 1
 
         return self.downloader[self.now_downloader]
-
-    def push_next_url(self, url, type=None,other={}):
-        self.url_queue.put({"url": url, "type": type,"other":other})
-
-    def push_result(self, data, type=None, other={}):
-        self.result_queue.put({"data": data, "type": type,"other":other})
+    def log(self,level, type , index, msg, context={}):
+        m = self.master
+        m.log.log(self.id,level,type,index,msg,context)
 
     # 监控主线程的消息
     def monitor(self):
@@ -63,39 +72,53 @@ class Worker:
             if r is False:
                 break
 
-    # 自己的url处理循环
+    # url处理循环
     def handle_url(self,handle_func):
         print("url处理循环")
-        while self.is_run:
-            get_url_data = self.url_queue.get()
-            for result in handle_func(self.get_downloader(), get_url_data,{}): # other留着以后使用
-                if result is not False:
-                    self.push_result(result["data"], result["type"], result["other"])
-                else:
-                    print("is false")
+        for get_url_data in self.url_queue.consume():
+            try:
+                if not self.is_run:
+                    break
+                data = get_url_data.value.decode()
+                print(data)
+                recv_obj = json.loads(data)
+                # 调用客户函数，其应该返回一个迭代器
+                for result in handle_func(self.get_downloader(), recv_obj, self.log):  # other留着以后使用
+                    if result is not False:
+                        send_str = json.dumps(result)  # 这个结果的结构完全交给用户脚本
+                        self.result_queue.produce(send_str.encode("utf-8"))
+                    else:
+                        print("is false")
+            except Exception as e:
+                print(e)
 
     # 结果处理循环
     def handle_result(self, parse):
         print("结果处理循环")
-        while self.is_run:
-            data = self.result_queue.get()
-            for (result, data_type, other) in parse(data["data"], data["type"], data["other"], self):
-                if result is not None and result is not False:
-                    self.push_result(result, data_type, other)
+        for data in self.result_queue.consume():
+            if not self.is_run:
+                break
+            recv_obj = json.loads(data.value.decode("utf-8"))
+
+            for result in parse(recv_obj, self.log):
+                if result is not False:
+                    send_str = json.dumps(result)  # 这个结果的结构完全交给用户脚本
+                    self.result_queue.produce(send_str.encode("utf-8"))
 
     # 运行,派出一个线程监控主线程消息,后自己进行url处理
     def run(self):
         def true_run():
             print("worker运行")
             self.is_run = True
+
+            # 启动一个和主线程沟通的线程
             monitor = threading.Thread(target=self.monitor)
             monitor.start()
 
             # 拿到解析函数解析
             module = __import__(self.config["explain"], fromlist=True)
-            if "after_get" in self.config:
-                self.after_get = getattr(module,self.config["after_get"])
 
+            # 启动解析线程
             parse_thread = []
             for i in range(0, self.config["parse_thread"]):
                 parse_func = getattr(module, "parse")
@@ -104,9 +127,12 @@ class Worker:
                 x.start()
                 parse_thread.append(x)
 
+
+            # 阻塞处理url
             handle_func = getattr(module,"handle")
             self.handle_url(handle_func)
 
+            # 等待结束
             monitor.join()
             for i in parse_thread:
                 i.join()
@@ -120,6 +146,10 @@ class Worker:
     def join(self):
         if self.thread != None:
             self.thread.join()
+
+
+
+
 
 
 if __name__ == "__main__":

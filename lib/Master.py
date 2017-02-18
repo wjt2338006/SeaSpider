@@ -1,19 +1,37 @@
 import signal
 
 from lib.Channel import Channel, URL_ADD, STOP_RUN
+from lib.Log import Log
 from lib.Proxy import Proxy
 from lib.Worker import Worker
 from lib.Config import Config
 
 
+def singleton(class_):
+    instance = {}
+
+    def get( *args, **kwargs):
+        if class_ not in instance:
+            instance[class_] = class_(*args, **kwargs)
+        return instance[class_]
+
+    return get
+
+
+@singleton
 class Master:
-    def __init__(self, config_path):
+    def __init__(self, config_path=None):
 
         c = Config(config_path)
         self.config = c
         self.worker_num = self.config.get('work_num')
         self.worker_pool = []
+        self.config_dict = {
+            "kafka_log_host": self.config.get('kafka_log_host'),
+            "kafka_log_topic": self.config.get("kafka_log_topic")
+        }
 
+        self.log = Log(self.config_dict["kafka_log_host"], self.config_dict["kafka_log_topic"])
 
 
     def run(self):
@@ -23,10 +41,9 @@ class Master:
             raise Exception('error worker count')
 
         for i in range(0, self.worker_num):
-            worker = Worker(work_list[i], Channel())
+            worker = Worker(work_list[i], Channel(),self)
             t = worker.run()
             self.add_work(work_list[i]['id'], worker, t)
-            worker.channel.put(URL_ADD, "https://search.jd.com/Search?keyword=%E6%9D%AF%E5%AD%90&enc=utf-8&wq=%E6%9D%AF%E5%AD%90&pvid=r2455uyi.yhg1ro2a")
 
         for i in self.worker_pool:
             i["thread"].join()
@@ -37,11 +54,10 @@ class Master:
                 "id": id,
                 "obj": work, "thread": thread
             })
+
     def run_proxy(self):
         self.proxy_list = Proxy(self.config.get("proxy"))
         self.proxy_list.run()
-
-
 
 
 if __name__ == "__main__":

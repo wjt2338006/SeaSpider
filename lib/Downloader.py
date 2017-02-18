@@ -18,12 +18,10 @@ class Downloader:
 
             self.driver = webdriver.PhantomJS(bin_path, service_args=s_args, desired_capabilities=caps)
 
-    def get(self, url, after_get_page=None,worker=None):
+    def get(self, url):
         try:
             self.driver.get(url)
             data = self.driver.page_source
-            if after_get_page is not None:
-                after_get_page(self.driver,worker)
             if len(data) == 0:
                 raise Exception('error empty page')
             return str(data)

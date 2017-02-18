@@ -1,24 +1,29 @@
 import json
-import traceback
 from time import sleep, time
 
 import requests
 from bs4 import BeautifulSoup
 
 
-def handle(download, get_url_data, other):
+def handle(download, get_url_data, log):
     try:
-        download.driver.get(get_url_data["url"])
-        data = download.dirver.page_source
-        yield (str(data), None, {"page": 1})
+
+        for i in range(0,1):
+            print(download)
+
+            download.driver.get(get_url_data["url"])
+            data = download.driver.page_source
+            print(str(data))
+            yield [str(data), TYPE_LIST_PAGE, {"page": 1}]
     except Exception as e:
         print(e)
         return False
 
-
-def parse(data, type, worker_obj):
-    if type == TYPE_LIST_PAGE or type == None:
-        data = BeautifulSoup(data, "lxml")
+# 这里获得的obj就是handle返回的那个
+def parse(recv_obj,log):
+    data = recv_obj[0]
+    if recv_obj[1] == TYPE_LIST_PAGE or type == None:
+        data = BeautifulSoup(recv_obj[0], "lxml")
         result_list = data.find_all(name="li", class_="gl-item")
         for k in range(0, len(result_list)):
             i = result_list[k]
@@ -27,7 +32,7 @@ def parse(data, type, worker_obj):
             # r =  parse_list_page(data,worker_obj)
             # print(r)
             # return  r
-    if type == TYPE_SINGLE_GOODS:
+    if recv_obj[1] == TYPE_SINGLE_GOODS:
         html = BeautifulSoup(data, 'html5lib').find(name="li")
 
         data = {}
@@ -44,7 +49,7 @@ def parse(data, type, worker_obj):
             # data["order"] = index
             print(data)  # 已经提取到了数据
             push_to_jd(data)
-            return False, False, {}
+            return False
         except Exception as e:
             print('解析错误' + str(e))
             # traceback.print_exc(e)
@@ -64,28 +69,32 @@ TYPE_SINGLE_GOODS = 2
 
 
 def push_to_jd(data):
-    url = "http://laravel_template.com/api/input"
-    sendData = {"param": {
-        'api': "pushJdData"
-    }}
-    sendData["param"]["args"] = {
-        'data_name': data["name"],
-        'data_price': data["price"],
-        'data_detail_url': data["detail_url"],
-        'data_jd_id': data["jd_id"],
-        'data_seller_name': data["seller_name"],
-        # 'data_order': data["order"]
-    }
 
-    r = requests.post(url, json=sendData)
-    result = json.loads(r.text)
-
-    if result["status"] == 200:
-        print('ok,i get some page')
-        sleep(1)
-        pass
-    else:
-        print('server error')
+    str = data["name"]
+    with open("/home/jedi/output","w+") as f:
+        f.write(str)
+    # url = "http://laravel_template.com/api/input"
+    # sendData = {"param": {
+    #     'api': "pushJdData"
+    # }}
+    # sendData["param"]["args"] = {
+    #     'data_name': data["name"],
+    #     'data_price': data["price"],
+    #     'data_detail_url': data["detail_url"],
+    #     'data_jd_id': data["jd_id"],
+    #     'data_seller_name': data["seller_name"],
+    #     # 'data_order': data["order"]
+    # }
+    #
+    # r = requests.post(url, json=sendData)
+    # result = json.loads(r.text)
+    #
+    # if result["status"] == 200:
+    #     print('ok,i get some page')
+    #     sleep(1)
+    #     pass
+    # else:
+    #     print('server error')
 
 
 def after_get(dirver, worker):

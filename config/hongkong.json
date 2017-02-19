@@ -1,0 +1,11 @@
+{
+    "server":"hk-172.hxg.cc",
+    "server_port":21792,
+    "local_address": "127.0.0.2",
+    "local_port":1080,
+    "password":"3Rt6Ih1fb5",
+    "timeout":300,
+    "method":"rc4-md5",
+    "fast_open": false
+}
+

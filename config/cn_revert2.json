@@ -1,0 +1,9 @@
+{
+    "server":"cn3t.hxg.cc",
+    "server_port":"21792",
+    "local_port":"1080",
+    "local_address": "127.0.0.4",
+    "password":"3Rt6Ih1fb5",
+    "method":"rc4-md5",
+    "remarks":"cn3t"
+}

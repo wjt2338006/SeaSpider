@@ -1,55 +1,83 @@
 import json
+import traceback
 from time import sleep, time
 
+import logging
 import requests
+import sys
 from bs4 import BeautifulSoup
+
+# 单例一个MongoDB链接
+from pymongo import MongoClient
+
+from lib.Log import Log
+from lib.database.Tools import get_mongo_cursor
+
+jd_data_store = get_mongo_cursor("spider.jd._id")
+
+"""
+{
+    "url":需要被爬取的url
+    "total":总页数
+    "index":关键字
+}
+"""
 
 
 def handle(download, get_url_data, log):
     try:
-
-        for i in range(0,1):
-            print(download)
-
-            download.driver.get(get_url_data["url"])
+        download.driver.get(get_url_data["url"])
+        total_page = get_url_data["total"]
+        index_key = get_url_data["index"]
+        for i in range(0, int(total_page)):
+            if i != 0:
+                download.dirver.find_element_by_class_name('pn-next').click()
+                sleep(3)
             data = download.driver.page_source
             print(str(data))
-            yield [str(data), TYPE_LIST_PAGE, {"page": 1}]
+            yield [str(data), TYPE_LIST_PAGE, {"page": i, "index_key": index_key}]
     except Exception as e:
         print(e)
         return False
 
+
 # 这里获得的obj就是handle返回的那个
-def parse(recv_obj,log):
+def parse(recv_obj, log):
     data = recv_obj[0]
-    if recv_obj[1] == TYPE_LIST_PAGE or type == None:
+    data_type = recv_obj[1]
+    other = recv_obj[2]
+    if data_type == TYPE_LIST_PAGE or data_type is None:
         data = BeautifulSoup(recv_obj[0], "lxml")
         result_list = data.find_all(name="li", class_="gl-item")
         for k in range(0, len(result_list)):
             i = result_list[k]
-            # print([str(i)])
-            yield (str(i), TYPE_SINGLE_GOODS, {})
-            # r =  parse_list_page(data,worker_obj)
-            # print(r)
-            # return  r
-    if recv_obj[1] == TYPE_SINGLE_GOODS:
-        html = BeautifulSoup(data, 'html5lib').find(name="li")
+            yield (str(i), TYPE_SINGLE_GOODS, dict(other, **{"page_offset": k}))
 
-        data = {}
-        data["jd_id"] = ""
-        data["name"] = ""
+    if data_type == TYPE_SINGLE_GOODS:
+        html = BeautifulSoup(data, 'lxml').find(name="li")
+
+        data = {
+            'data_name': "",
+            'data_price': "",
+            'data_detail_url': "",
+            'data_jd_id': "",
+            'data_seller_name': "",
+            'data_order': ""
+        }
         try:
             name_div = html.find(name="div", class_="p-name")
-            data["name"] = name_div.a.em.get_text()
+            data["data_name"] = name_div.a.em.get_text()
 
-            data["price"] = html.find(name="div", class_="p-price").strong.i.get_text()
-            data["detail_url"] = name_div.a["href"]
-            data["jd_id"] = html["data-spu"]
-            data["seller_name"] = explain_shop(html, data)
-            # data["order"] = index
+            data["data_price"] = html.find(name="div", class_="p-price").strong.i.get_text()
+            data["data_detail_url"] = name_div.a["href"]
+            data["data_jd_id"] = html["data-spu"]
+            data["data_seller_name"] = explain_shop(html, data)
+            data["data_page_offset"] = other["page_offset"]
+            data["data_page_number"] = other["page"]
+            data["data_index_key"] = other["index_key"]
             print(data)  # 已经提取到了数据
             push_to_jd(data)
-            return False
+            return None
         except Exception as e:
             print('解析错误' + str(e))
             # traceback.print_exc(e)
@@ -69,10 +97,12 @@ TYPE_SINGLE_GOODS = 2
 
 
 def push_to_jd(data):
+    r = jd_data_store.insert(data)
 
-    str = data["name"]
-    with open("/home/jedi/output","w+") as f:
-        f.write(str)
+    # str = data["name"]
+    #
+    # with open("/home/jedi/output","w+") as f:
+    #     f.write(str)
     # url = "http://laravel_template.com/api/input"
     # sendData = {"param": {
     #     'api': "pushJdData"
@@ -97,12 +127,28 @@ def push_to_jd(data):
     #     print('server error')
 
 
-def after_get(dirver, worker):
-    n = 0
-    while n < 10:
-        print('完成后点击了下一页')
-        dirver.find_element_by_class_name('pn-next').click()
-        sleep(5)
-        worker.push_result(str(dirver.page_source), None)
-        print("推入了结果")
-        n += 1
+#
+# def after_get(dirver, worker):
+#     n = 0
+#     while n < 10:
+#         print('完成后点击了下一页')
+#         dirver.find_element_by_class_name('pn-next').click()
+#         sleep(5)
+#         worker.push_result(str(dirver.page_source), None)
+#         print("推入了结果")
+#         n += 1
+if __name__ == "__main__":
+    try:
+        push_to_jd({
+            'data_name': "测试联通的商品",
+            'data_price': "19.99",
+            'data_detail_url': "详情页面的url",
+            'data_jd_id': "jd 商品id",
+            'data_seller_name': "超级无敌大卖场",
+            'data_order': "16"
+        })
+    except Exception as e:
+        error = traceback.format_exc()
+
+        # traceback.print_exception(e,"err",None)
+

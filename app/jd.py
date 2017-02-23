@@ -37,12 +37,13 @@ def handle(download, get_url_data, log):
             print(str(data))
             yield [str(data), TYPE_LIST_PAGE, {"page": i, "index_key": index_key}]
     except Exception as e:
-        print(e)
+        traceback.format_exc()
         return False
 
 
 # 这里获得的obj就是handle返回的那个
 def parse(recv_obj, log):
+    print("解析消息",recv_obj)
     data = recv_obj[0]
     data_type = recv_obj[1]
     other = recv_obj[2]
@@ -79,8 +80,7 @@ def parse(recv_obj, log):
             push_to_jd(data)
             return None
         except Exception as e:
-            print('解析错误' + str(e))
-            # traceback.print_exc(e)
+            print(traceback.format_exc())
 
 
 def explain_shop(div, data):

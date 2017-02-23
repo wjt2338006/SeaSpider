@@ -1,6 +1,6 @@
 import json
 import threading
-
+import traceback
 
 from lib.Channel import *
 from lib.Downloader import Downloader
@@ -80,7 +80,7 @@ class Worker:
                 if not self.is_run:
                     break
                 data = get_url_data.value.decode()
-                print(data)
+
                 recv_obj = json.loads(data)
                 # 调用客户函数，其应该返回一个迭代器
                 for result in handle_func(self.get_downloader(), recv_obj, self.log):  # other留着以后使用
@@ -90,20 +90,27 @@ class Worker:
                     else:
                         print("is false")
             except Exception as e:
-                print(e)
+                print("url处理循环出错",traceback.format_exc())
+            finally:
+                self.url_queue.commit_offset()
 
     # 结果处理循环
     def handle_result(self, parse):
-        print("结果处理循环")
         for data in self.result_queue.consume():
             if not self.is_run:
                 break
-            recv_obj = json.loads(data.value.decode("utf-8"))
+            try:
 
-            for result in parse(recv_obj, self.log):
-                if result is not False:
-                    send_str = json.dumps(result)  # 这个结果的结构完全交给用户脚本
-                    self.result_queue.produce(send_str.encode("utf-8"))
+                recv_obj = json.loads(data.value.decode("utf-8"))
+
+                for result in parse(recv_obj, self.log):
+                    if result is not False:
+                        send_str = json.dumps(result)  # 这个结果的结构完全交给用户脚本
+                        self.result_queue.produce(send_str.encode("utf-8"))
+            except Exception as e:
+                print("结果处理循环错误",traceback.format_exc())
+            finally:
+                self.result_queue.commit_offset()
 
     # 运行,派出一个线程监控主线程消息,后自己进行url处理
     def run(self):

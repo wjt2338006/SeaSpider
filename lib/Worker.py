@@ -1,6 +1,8 @@
 import json
 import threading
+import traceback
 
+import logging
 
 from lib.Channel import *
 from lib.Downloader import Downloader
@@ -76,34 +78,44 @@ class Worker:
     def handle_url(self,handle_func):
         print("url处理循环")
         for get_url_data in self.url_queue.consume():
+            print("url:",get_url_data)
             try:
                 if not self.is_run:
                     break
                 data = get_url_data.value.decode()
-                print(data)
+
                 recv_obj = json.loads(data)
                 # 调用客户函数，其应该返回一个迭代器
-                for result in handle_func(self.get_downloader(), recv_obj, self.log):  # other留着以后使用
+                d = self.get_downloader()
+                for result in handle_func(d, recv_obj, self.log):  # other留着以后使用
                     if result is not False:
                         send_str = json.dumps(result)  # 这个结果的结构完全交给用户脚本
                         self.result_queue.produce(send_str.encode("utf-8"))
                     else:
                         print("is false")
             except Exception as e:
-                print(e)
+                print("url error:" + traceback.format_exc())
+            finally:
+                self.url_queue.commit_offset()
 
     # 结果处理循环
     def handle_result(self, parse):
-        print("结果处理循环")
         for data in self.result_queue.consume():
+            print(data)
             if not self.is_run:
                 break
-            recv_obj = json.loads(data.value.decode("utf-8"))
+            try:
 
-            for result in parse(recv_obj, self.log):
-                if result is not False:
-                    send_str = json.dumps(result)  # 这个结果的结构完全交给用户脚本
-                    self.result_queue.produce(send_str.encode("utf-8"))
+                recv_obj = json.loads(data.value.decode("utf-8"))
+
+                for result in parse(recv_obj, self.log):
+                    if result is not False:
+                        send_str = json.dumps(result)  # 这个结果的结构完全交给用户脚本
+                        self.result_queue.produce(send_str.encode("utf-8"))
+            except Exception as e:
+                print("result error:" + traceback.format_exc())
+            finally:
+                self.result_queue.commit_offset()
 
     # 运行,派出一个线程监控主线程消息,后自己进行url处理
     def run(self):

@@ -22,7 +22,8 @@ class MsgQueue:
     def consume(self):
         if not self.consumer:
             if self.consumer_group:
-                self.consumer = self.topic.get_balanced_consumer(self.consumer_group.encode())
+                self.consumer = self.topic.get_simple_consumer(self.consumer_group.encode())
+                # self.consumer = self.topic.get_balanced_consumer(self.consumer_group.encode())
             else:
                 self.consumer = self.topic.get_simple_consumer()
 

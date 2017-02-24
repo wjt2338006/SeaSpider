@@ -30,14 +30,17 @@ def handle(download, get_url_data, log):
         total_page = get_url_data["total"]
         index_key = get_url_data["index"]
         for i in range(0, int(total_page)):
+            print("当前第"+str(i)+"页")
             if i != 0:
-                download.dirver.find_element_by_class_name('pn-next').click()
+                download.driver.find_element_by_class_name('pn-next').click()
                 sleep(3)
             data = download.driver.page_source
-            print(str(data))
+            # print(str(data))
             yield [str(data), TYPE_LIST_PAGE, {"page": i, "index_key": index_key}]
     except Exception as e:
-        traceback.format_exc()
+        error = "handle error:" + traceback.format_exc()
+        # logging.info(error)
+        print(error)
         return False
 
 
@@ -71,7 +74,7 @@ def parse(recv_obj, log):
 
             data["data_price"] = html.find(name="div", class_="p-price").strong.i.get_text()
             data["data_detail_url"] = name_div.a["href"]
-            data["data_jd_id"] = html["data-spu"]
+            data["data_jd_id"] = html["data-sku"]
             data["data_seller_name"] = explain_shop(html, data)
             data["data_page_offset"] = other["page_offset"]
             data["data_page_number"] = other["page"]
@@ -80,7 +83,10 @@ def parse(recv_obj, log):
             push_to_jd(data)
             return None
         except Exception as e:
-            print(traceback.format_exc())
+            error = "result  error:" + traceback.format_exc()
+            # logging.info(error)
+            print(error)
+
 
 
 def explain_shop(div, data):
@@ -97,7 +103,11 @@ TYPE_SINGLE_GOODS = 2
 
 
 def push_to_jd(data):
-    r = jd_data_store.insert(data)
+    isset = jd_data_store.find_one({"data_jd_id":data["data_jd_id"]})
+    if isset:
+        jd_data_store.update({"data_jd_id":data["data_jd_id"]},data)
+    else:
+        r = jd_data_store.insert(data)
 
     # str = data["name"]
     #

@@ -2,6 +2,8 @@ import json
 import threading
 import traceback
 
+import logging
+
 from lib.Channel import *
 from lib.Downloader import Downloader
 from lib.MsgQueue import MsgQueue
@@ -76,6 +78,7 @@ class Worker:
     def handle_url(self,handle_func):
         print("url处理循环")
         for get_url_data in self.url_queue.consume():
+            print("url:",get_url_data)
             try:
                 if not self.is_run:
                     break
@@ -83,20 +86,22 @@ class Worker:
 
                 recv_obj = json.loads(data)
                 # 调用客户函数，其应该返回一个迭代器
-                for result in handle_func(self.get_downloader(), recv_obj, self.log):  # other留着以后使用
+                d = self.get_downloader()
+                for result in handle_func(d, recv_obj, self.log):  # other留着以后使用
                     if result is not False:
                         send_str = json.dumps(result)  # 这个结果的结构完全交给用户脚本
                         self.result_queue.produce(send_str.encode("utf-8"))
                     else:
                         print("is false")
             except Exception as e:
-                print("url处理循环出错",traceback.format_exc())
+                print("url error:" + traceback.format_exc())
             finally:
                 self.url_queue.commit_offset()
 
     # 结果处理循环
     def handle_result(self, parse):
         for data in self.result_queue.consume():
+            print(data)
             if not self.is_run:
                 break
             try:
@@ -108,7 +113,7 @@ class Worker:
                         send_str = json.dumps(result)  # 这个结果的结构完全交给用户脚本
                         self.result_queue.produce(send_str.encode("utf-8"))
             except Exception as e:
-                print("结果处理循环错误",traceback.format_exc())
+                print("result error:" + traceback.format_exc())
             finally:
                 self.result_queue.commit_offset()
 

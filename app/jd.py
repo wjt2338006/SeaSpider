@@ -41,8 +41,9 @@ def handle(download, get_url_data, log):
             print("当前第"+str(i+1)+"页")
             if i > 0:
                 download.driver.find_element_by_class_name('pn-next').click()
+                sleep(3)
                 download.driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
-                sleep(5)
+                sleep(2)
             else:
                 download.driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
                 sleep(3)

@@ -11,8 +11,8 @@ class MsgQueue:
         self.consumer_group = consumer_group
         self.topic = topic
         self.cluster_addr = cluster_addr
-
-        self.client = KafkaClient(hosts="127.0.0.1:9092")
+        print(cluster_addr)
+        self.client = KafkaClient(hosts=self.cluster_addr)
         self.topic = self.client.topics[topic.encode()]
         self.consumer_group = consumer_group
 

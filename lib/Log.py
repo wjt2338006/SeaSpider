@@ -19,7 +19,7 @@ class Log:
         self.produce = MsgQueue(host, topics)
 
     def log(self, worker, level, type , index, msg, context={}):
-        log_str = '[%s] [%s] [%s] [%s] [%s] %s %s' % ( time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) ,worker, level, type, index, msg, json.dump(context))
-        self.produce.produce(log_str)
+        log_str = '[%s] [%s] [%s] [%s] [%s] %s %s' % ( time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) ,worker, level, type, index, msg, json.dumps(context))
+        self.produce.produce(log_str.encode())
 
 

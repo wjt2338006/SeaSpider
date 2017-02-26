@@ -6,7 +6,9 @@ import logging
 
 from lib.Channel import *
 from lib.Downloader import Downloader
+from lib.Log import Log
 from lib.MsgQueue import MsgQueue
+from lib.exception.Exception import ParseError
 
 
 class Worker:
@@ -19,12 +21,20 @@ class Worker:
 
         # url接受频道
         tmp_url_queue = config["url_queue"]
-        self.url_queue = MsgQueue(tmp_url_queue["host"],tmp_url_queue["topic"],tmp_url_queue["consumer_group"])
+        self.url_queue = MsgQueue(tmp_url_queue["host"], tmp_url_queue["topic"], tmp_url_queue["consumer_group"])
 
         # 结果批处理频道
         tmp_result_queue = config["result_queue"]
-        self.result_queue = MsgQueue(tmp_result_queue["host"],tmp_result_queue["topic"],tmp_result_queue["consumer_group"])
+        self.result_queue = MsgQueue(tmp_result_queue["host"], tmp_result_queue["topic"],
+                                     tmp_result_queue["consumer_group"])
 
+        # 初始化错误处理频道
+        tmp_error_queue = config["error_queue"]
+        self.error_queue = MsgQueue(tmp_error_queue["host"], tmp_error_queue["topic"],
+                                    tmp_error_queue["consumer_group"])
+
+        tmp_final_queue = config["final_queue"]
+        self.final_queue = MsgQueue(tmp_final_queue["host"], tmp_final_queue["topic"])
 
         # 下载器初始化
         self.downloader = []
@@ -36,10 +46,9 @@ class Worker:
         # 其他变量初始化
         self.is_run = False
         self.thread = None
-        self.after_get=None
+        self.after_get = None
         self.id = self.config["id"]
         self.master = master
-
 
     def get_channel(self):
         return self.channel
@@ -48,6 +57,7 @@ class Worker:
     def signal_stop_run(self, data):
         self.is_run = False
         return False
+
     #
     # # 添加url信号
     # def signal_url_add(self, data):
@@ -63,9 +73,11 @@ class Worker:
             self.now_downloader += 1
 
         return self.downloader[self.now_downloader]
-    def log(self,level, type , index, msg, context={}):
+
+    def log(self, level, type, index, msg, context={}):
         m = self.master
-        m.log.log(self.id,level,type,index,msg,context)
+        m.log.log(self.id, level, type, index, msg, context)
+        print("输出log")
 
     # 监控主线程的消息
     def monitor(self):
@@ -75,10 +87,10 @@ class Worker:
                 break
 
     # url处理循环
-    def handle_url(self,handle_func):
+    def handle_url(self, handle_func):
         print("url处理循环")
         for get_url_data in self.url_queue.consume():
-            print("url:",get_url_data)
+            print("url:", get_url_data)
             try:
                 if not self.is_run:
                     break
@@ -92,28 +104,32 @@ class Worker:
                         send_str = json.dumps(result)  # 这个结果的结构完全交给用户脚本
                         self.result_queue.produce(send_str.encode("utf-8"))
                     else:
-                        print("is false")
+                        print("is false ,means EOF")
             except Exception as e:
-                print("url error:" + traceback.format_exc())
+                # print("url_handle_error",traceback.format_exc())
+                self.log(Log.Error, "url_handle_error", None, traceback.format_exc(), get_url_data.value.decode())
             finally:
                 self.url_queue.commit_offset()
 
     # 结果处理循环
     def handle_result(self, parse):
         for data in self.result_queue.consume():
-            print(data)
             if not self.is_run:
                 break
             try:
-
                 recv_obj = json.loads(data.value.decode("utf-8"))
 
-                for result in parse(recv_obj, self.log):
+                for result in parse(recv_obj, self.log, self.final_queue):
                     if result is not False:
                         send_str = json.dumps(result)  # 这个结果的结构完全交给用户脚本
                         self.result_queue.produce(send_str.encode("utf-8"))
+            except ParseError as pe:
+                # print("result error", traceback.format_exc())
+                error_data = {"data": recv_obj, "error": traceback.format_exc()}
+                self.error_queue.produce(json.dumps(error_data).encode())
             except Exception as e:
-                print("result error:" + traceback.format_exc())
+                print("result error", traceback.format_exc())
+                self.log(Log.Error, "result_handle_error", None, traceback.format_exc(), data.value.decode())
             finally:
                 self.result_queue.commit_offset()
 
@@ -139,9 +155,8 @@ class Worker:
                 x.start()
                 parse_thread.append(x)
 
-
             # 阻塞处理url
-            handle_func = getattr(module,"handle")
+            handle_func = getattr(module, "handle")
             self.handle_url(handle_func)
 
             # 等待结束
@@ -151,17 +166,13 @@ class Worker:
             print("线程安全停止")
 
         self.thread = threading.Thread(target=true_run)
-        self.thread.start() #防止阻塞主线程
+        self.thread.start()  # 防止阻塞主线程
         print("主线程启动了一个Work子线程")
         return self.thread
 
     def join(self):
         if self.thread != None:
             self.thread.join()
-
-
-
-
 
 
 if __name__ == "__main__":

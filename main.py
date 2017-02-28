@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 from lib.Master import Master
 
 m = Master("./config/main.json")

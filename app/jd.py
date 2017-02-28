@@ -4,17 +4,10 @@ import traceback
 import urllib
 from time import sleep, time
 
-import logging
-
-import requests
-import sys
 from bs4 import BeautifulSoup
 
-from lib.Log import Log
-from lib.database.Tools import get_mongo_cursor
 from lib.exception.Exception import ParseError
 
-jd_data_store = get_mongo_cursor("spider.jd._id")
 
 """
 {

@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="6c81d2e9-ed1f-493d-a6c4-93686ce67a60" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/Downloader.py" afterPath="$PROJECT_DIR$/lib/Downloader.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/config/main.json" afterPath="$PROJECT_DIR$/config/main.json" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -143,7 +143,7 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="Proxy.py" pinned="false" current-in-tab="true">
+          <file leaf-file-name="Proxy.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/lib/Proxy.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="0">
@@ -167,11 +167,11 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="main.json" pinned="false" current-in-tab="false">
+          <file leaf-file-name="main.json" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/config/main.json">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="494">
-                  <caret line="26" column="23" lean-forward="false" selection-start-line="26" selection-start-column="23" selection-end-line="26" selection-end-column="23" />
+                <state relative-caret-position="475">
+                  <caret line="25" column="26" lean-forward="true" selection-start-line="25" selection-start-column="26" selection-end-line="25" selection-end-column="26" />
                   <folding />
                 </state>
               </provider>
@@ -234,12 +234,12 @@
         <option value="$PROJECT_DIR$/lib/MsgQueue.py" />
         <option value="$PROJECT_DIR$/lib/Log.py" />
         <option value="$PROJECT_DIR$/TodoList" />
-        <option value="$PROJECT_DIR$/config/main.json" />
         <option value="$PROJECT_DIR$/lib/Worker.py" />
         <option value="$PROJECT_DIR$/app/jd.py" />
         <option value="$PROJECT_DIR$/old/Worker.py" />
         <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/lib/Downloader.py" />
+        <option value="$PROJECT_DIR$/config/main.json" />
       </list>
     </option>
   </component>
@@ -739,7 +739,14 @@
       <option name="project" value="LOCAL" />
       <updated>1488284602655</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="过滤广告">
+      <created>1488284700555</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1488284700555</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1088,14 +1095,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/config/main.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="494">
-          <caret line="26" column="23" lean-forward="false" selection-start-line="26" selection-start-column="23" selection-end-line="26" selection-end-column="23" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/old/Worker.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="209">
@@ -1203,6 +1202,14 @@
           <folding>
             <element signature="e#0#30#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/config/main.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="475">
+          <caret line="25" column="26" lean-forward="true" selection-start-line="25" selection-start-column="26" selection-end-line="25" selection-end-column="26" />
+          <folding />
         </state>
       </provider>
     </entry>

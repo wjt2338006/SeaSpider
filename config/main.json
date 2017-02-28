@@ -56,12 +56,12 @@
     },
     {
       "name": "cn_1",
-      "config": "../config/cn_revert1.json",
+      "config": "./config/cn_revert1.json",
       "type": "socks5"
     },
     {
       "name": "cn_2",
-      "config": "../config/cn_revert2.json",
+      "config": "./config/cn_revert2.json",
       "type": "socks5"
     }
   ]

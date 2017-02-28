@@ -3,7 +3,7 @@ from selenium.webdriver import DesiredCapabilities
 
 
 class Downloader:
-    def __init__(self, config, bin_path='/usr/local/bin/phantomjs'):
+    def __init__(self, config, bin_path='phantomjs'):
         self.type = config['type']  # 选择下载器类型
         if self.type == 'selenium':
             s_args = []

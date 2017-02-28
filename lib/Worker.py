@@ -3,7 +3,6 @@ import json
 import threading
 import traceback
 
-import logging
 
 from lib.Channel import *
 from lib.Downloader import Downloader

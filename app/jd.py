@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 import json
 import traceback
 import urllib
@@ -8,9 +9,6 @@ import logging
 import requests
 import sys
 from bs4 import BeautifulSoup
-
-# 单例一个MongoDB链接
-from pymongo import MongoClient
 
 from lib.Log import Log
 from lib.database.Tools import get_mongo_cursor

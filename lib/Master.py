@@ -1,3 +1,4 @@
+#-*- coding:utf-8 -*-
 import signal
 
 from lib.Channel import Channel, URL_ADD, STOP_RUN

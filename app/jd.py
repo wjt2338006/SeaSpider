@@ -27,29 +27,29 @@ jd_data_store = get_mongo_cursor("spider.jd._id")
 """
 page_total = {}
 
+
 def handle(download, get_url_data, log):
     try:
         url = get_url_data["url"]
 
-
         download.driver.get(url)
 
-        total_page = 2 #get_url_data["total"]
+        total_page = 2  # get_url_data["total"]
         index_key = get_url_data["index"]
         # print(url)
         for i in range(0, int(total_page)):
-            print("当前第"+str(i+1)+"页")
+            print("当前第" + str(i + 1) + "页")
             if i > 0:
                 download.driver.find_element_by_class_name('pn-next').click()
-                sleep(3)
+                sleep(4)
                 download.driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
-                sleep(2)
+                sleep(1)
             else:
                 download.driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
-                sleep(3)
+                sleep(2)
             data = download.driver.page_source
             # print(str(data))
-            yield [str(data), TYPE_LIST_PAGE, {"page": i+1, "index_key": index_key}]
+            yield [str(data), TYPE_LIST_PAGE, {"page": i + 1, "index_key": index_key}]
     except Exception as e:
         error = "handle error:" + traceback.format_exc()
         # logging.info(error)
@@ -58,8 +58,8 @@ def handle(download, get_url_data, log):
 
 
 # 这里获得的obj就是handle返回的那个
-def parse(recv_obj, log,final_queue):
-    print("解析结果",recv_obj)
+def parse(recv_obj, log, final_queue):
+    print("解析结果", recv_obj)
     data = recv_obj[0]
     data_type = recv_obj[1]
     other = recv_obj[2]
@@ -70,30 +70,30 @@ def parse(recv_obj, log,final_queue):
 
         now_index_key = page_total[other["index_key"]]
 
-
         data = BeautifulSoup(recv_obj[0], "lxml")
         result_list = data.find_all(name="li", class_="gl-item")
-        print("共有块元素"+str(len(result_list)))
+        print("共有块元素" + str(len(result_list)))
 
-        #注意加入了这个功能以后要确保拿到的页码数据有序,同时目前代码没有保证线程安全
+        # 注意加入了这个功能以后要确保拿到的页码数据有序,同时目前代码没有保证线程安全
         if other["page"] == 1:
-            true_index = 0  #记录有效的商品,如果是第一页的话，设置为0
+            true_index = 0  # 记录有效的商品,如果是第一页的话，设置为0
         else:
             try:
-                true_index = now_index_key["page_" + str(other["page"]-1)] #如果是后面的页数的话 设定为前面页商品之和
+                true_index = now_index_key["page_" + str(other["page"] - 1)]  # 如果是后面的页数的话 设定为前面页商品之和
             except IndexError as e:
                 print("前一页数据还没准备好")
-                raise  e
+                raise e
 
         for k in range(0, len(result_list)):
             i = result_list[k]
+            # li = i.find(name="li")
+            # print(li)
             if "data-type" in i and i["data-type"] == "activity":
                 continue
             true_index += 1
-            print(true_index)
-            yield (str(i), TYPE_SINGLE_GOODS, dict(other, **{"page_offset": true_index,"all_offset":true_index}))
-        now_index_key["page_" + str(other["page"])] =true_index
-
+            # print(true_index)
+            yield (str(i), TYPE_SINGLE_GOODS, dict(other, **{"page_offset": true_index, "all_offset": true_index}))
+        now_index_key["page_" + str(other["page"])] = true_index
 
     if data_type == TYPE_SINGLE_GOODS:
         html = BeautifulSoup(data, 'lxml').find(name="li")
@@ -111,27 +111,26 @@ def parse(recv_obj, log,final_queue):
 
             data["data_name"] = name_div.a.em.get_text()
 
-            data["data_price"] = html.find(name="div", class_="p-price").strong.i.get_text()
+            data["data_price"] = explain_price(html)
             data["data_detail_url"] = name_div.a["href"]
             data["data_jd_id"] = html["data-sku"]
-            data["data_seller_name"] = explain_shop(html, data)
+            data["data_seller_name"] = explain_shop(html)
             data["data_page_offset"] = other["page_offset"]
             data["data_page_number"] = other["page"]
             data["data_index_key"] = other["index_key"]
             data["data_order"] = other["all_offset"]
             # print(data)  # 已经提取到了数据
-            push_to_jd(data,final_queue)
+            push_to_jd(data, final_queue)
             return None
         except Exception as e:
             error = "result  error:" + traceback.format_exc()
             # logging.info(error)
             print(error)
 
-            raise ParseError("Parse Error "+error)
+            raise ParseError("Parse Error " + error)
 
 
-
-def explain_shop(div, data):
+def explain_shop(div):
     seller_name = "自营"
     try:
         seller_name = div.find(name="div", class_="p-shop").span.a["title"]
@@ -140,11 +139,21 @@ def explain_shop(div, data):
         return str(seller_name)
 
 
+def explain_price(div):
+    p = None
+    try:
+        p = div.find(name="div", class_="p-price").strong.i.get_text()
+    except e:
+        p = None
+    finally:
+        return p
+
+
 TYPE_LIST_PAGE = 1
 TYPE_SINGLE_GOODS = 2
 
 
-def push_to_jd(data,final_queue):
+def push_to_jd(data, final_queue):
     data["spider_time"] = time()
     data = json.dumps(data)
     final_queue.produce(data.encode())
@@ -206,4 +215,3 @@ if __name__ == "__main__":
         error = traceback.format_exc()
 
         # traceback.print_exception(e,"err",None)
-

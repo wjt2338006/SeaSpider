@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="6c81d2e9-ed1f-493d-a6c4-93686ce67a60" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/Worker.py" afterPath="$PROJECT_DIR$/lib/Worker.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/ghostdriver.log" afterPath="$PROJECT_DIR$/lib/ghostdriver.log" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
     </list>
@@ -44,9 +45,9 @@
             <entry file="file://$PROJECT_DIR$/lib/Worker.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="0">
-                  <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+                  <caret line="0" column="21" lean-forward="false" selection-start-line="0" selection-start-column="21" selection-end-line="0" selection-end-column="21" />
                   <folding>
-                    <element signature="e#0#11#0" expanded="true" />
+                    <element signature="e#22#33#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
@@ -89,9 +90,11 @@
           <file leaf-file-name="main.py" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/main.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="38">
-                  <caret line="2" column="0" lean-forward="true" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-                  <folding />
+                <state relative-caret-position="114">
+                  <caret line="6" column="9" lean-forward="true" selection-start-line="6" selection-start-column="9" selection-end-line="6" selection-end-column="9" />
+                  <folding>
+                    <element signature="e#22#50#0" expanded="true" />
+                  </folding>
                 </state>
               </provider>
             </entry>
@@ -240,8 +243,8 @@
         <option value="$PROJECT_DIR$/old/Worker.py" />
         <option value="$PROJECT_DIR$/lib/Downloader.py" />
         <option value="$PROJECT_DIR$/config/main.json" />
-        <option value="$PROJECT_DIR$/lib/Worker.py" />
         <option value="$PROJECT_DIR$/lib/Master.py" />
+        <option value="$PROJECT_DIR$/lib/Worker.py" />
         <option value="$PROJECT_DIR$/main.py" />
       </list>
     </option>
@@ -763,7 +766,14 @@
       <option name="project" value="LOCAL" />
       <updated>1488285119674</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="过滤广告">
+      <created>1488285348839</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1488285348839</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -863,7 +873,7 @@
         <state relative-caret-position="1666">
           <caret line="102" column="83" lean-forward="false" selection-start-line="102" selection-start-column="20" selection-end-line="102" selection-end-column="83" />
           <folding>
-            <element signature="e#0#11#0" expanded="true" />
+            <element signature="e#22#33#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -920,7 +930,7 @@
         <state relative-caret-position="1666">
           <caret line="102" column="83" lean-forward="true" selection-start-line="102" selection-start-column="20" selection-end-line="102" selection-end-column="83" />
           <folding>
-            <element signature="e#0#11#0" expanded="true" />
+            <element signature="e#22#33#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1224,16 +1234,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/Worker.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#11#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/Master.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -1244,11 +1244,23 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/lib/Worker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="21" lean-forward="false" selection-start-line="0" selection-start-column="21" selection-end-line="0" selection-end-column="21" />
+          <folding>
+            <element signature="e#22#33#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="38">
-          <caret line="2" column="0" lean-forward="true" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-          <folding />
+        <state relative-caret-position="114">
+          <caret line="6" column="9" lean-forward="true" selection-start-line="6" selection-start-column="9" selection-end-line="6" selection-end-column="9" />
+          <folding>
+            <element signature="e#22#50#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

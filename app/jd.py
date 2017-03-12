@@ -149,7 +149,7 @@ TYPE_SINGLE_GOODS = 2
 def push_to_jd(data, final_queue):
     data["spider_time"] = time()
     data = json.dumps(data)
-    logging.info("data will send",data)
+    #logging.info("data will send",data)
     final_queue.produce(data.encode())
     # isset = jd_data_store.find_one({"data_jd_id":data["data_jd_id"]})
     # if isset:

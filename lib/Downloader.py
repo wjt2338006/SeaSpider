@@ -17,7 +17,7 @@ class Downloader:
                                                         " Safari/537.36 "
 
             self.driver = webdriver.PhantomJS(bin_path, service_args=s_args, desired_capabilities=caps)
-            self.driver.set_page_load_timeout(10)
+            # self.driver.set_page_load_timeout(10)
 
     def get(self, url):
         try:

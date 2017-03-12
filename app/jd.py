@@ -51,7 +51,7 @@ def handle(download, get_url_data, log):
 
 # 这里获得的obj就是handle返回的那个
 def parse(recv_obj, log, final_queue):
-    logging.info("解析结果", recv_obj)
+    logging.info("解析结果"+json.dumps(recv_obj))
     data = recv_obj[0]
     data_type = recv_obj[1]
     other = recv_obj[2]

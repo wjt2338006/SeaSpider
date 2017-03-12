@@ -91,7 +91,6 @@ class Worker:
     def handle_url(self, handle_func):
         logging.info("url处理循环")
         for get_url_data in self.url_queue.consume():
-            logging.info("url:"+json.dumps(get_url_data))
             try:
                 if not self.is_run:
                     break

@@ -19,13 +19,13 @@ def singleton(class_):
     return get
 
 
-# import logging
-#
-# logging.basicConfig(level=logging.WARNING,
-#                     filename='../log/log.txt',
-#                     filemode='w',
-#                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
+import logging
 
+logging.basicConfig(level=logging.DEBUG,
+                format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                datefmt='%a, %d %b %Y %H:%M:%S',
+                filename='/var/log/sea_spider/logging.log',
+                filemode='w')
 @singleton
 class Master:
     def __init__(self, config_path=None):

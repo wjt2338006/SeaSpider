@@ -4,6 +4,7 @@ import traceback
 import urllib
 from time import sleep, time
 
+import logging
 from bs4 import BeautifulSoup
 
 from lib.exception.Exception import ParseError
@@ -29,7 +30,7 @@ def handle(download, get_url_data, log):
         index_key = get_url_data["index"]
         # print(url)
         for i in range(0, int(total_page)):
-            print("当前第" + str(i + 1) + "页")
+            logging.info("当前第" + str(i + 1) + "页")
             if i > 0:
                 download.driver.find_element_by_class_name('pn-next').click()
                 sleep(4)
@@ -50,7 +51,7 @@ def handle(download, get_url_data, log):
 
 # 这里获得的obj就是handle返回的那个
 def parse(recv_obj, log, final_queue):
-    print("解析结果", recv_obj)
+    logging.info("解析结果", recv_obj)
     data = recv_obj[0]
     data_type = recv_obj[1]
     other = recv_obj[2]
@@ -63,7 +64,7 @@ def parse(recv_obj, log, final_queue):
 
         data = BeautifulSoup(recv_obj[0], "lxml")
         result_list = data.find_all(name="li", class_="gl-item")
-        print("共有块元素" + str(len(result_list)))
+        logging.info("共有块元素" + str(len(result_list)))
 
         # 注意加入了这个功能以后要确保拿到的页码数据有序,同时目前代码没有保证线程安全
         if other["page"] == 1:
@@ -72,7 +73,7 @@ def parse(recv_obj, log, final_queue):
             try:
                 true_index = now_index_key["page_" + str(other["page"] - 1)]  # 如果是后面的页数的话 设定为前面页商品之和
             except IndexError as e:
-                print("前一页数据还没准备好")
+                logging.info("前一页数据还没准备好")
                 raise e
 
         for k in range(0, len(result_list)):
@@ -82,7 +83,8 @@ def parse(recv_obj, log, final_queue):
             if "data-type" in i and i["data-type"] == "activity":
                 continue
             true_index += 1
-            # print(true_index)
+
+            logging.info("数据分块已经返回")
             yield (str(i), TYPE_SINGLE_GOODS, dict(other, **{"page_offset": true_index, "all_offset": true_index}))
         now_index_key["page_" + str(other["page"])] = true_index
 
@@ -147,7 +149,7 @@ TYPE_SINGLE_GOODS = 2
 def push_to_jd(data, final_queue):
     data["spider_time"] = time()
     data = json.dumps(data)
-    print("data will send",data)
+    logging.info("data will send",data)
     final_queue.produce(data.encode())
     # isset = jd_data_store.find_one({"data_jd_id":data["data_jd_id"]})
     # if isset:

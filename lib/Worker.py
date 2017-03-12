@@ -3,6 +3,7 @@ import json
 import threading
 import traceback
 
+import logging
 
 from lib.Channel import *
 from lib.Downloader import Downloader
@@ -88,9 +89,9 @@ class Worker:
 
     # url处理循环
     def handle_url(self, handle_func):
-        print("url处理循环")
+        logging.info("url处理循环")
         for get_url_data in self.url_queue.consume():
-            print("url:", get_url_data)
+            logging.info("url:", get_url_data)
             try:
                 if not self.is_run:
                     break
@@ -107,7 +108,8 @@ class Worker:
                         print("is false ,means EOF")
             except Exception as e:
                 # print("url_handle_error",traceback.format_exc())
-                self.log(Log.Error, "url_handle_error", None, traceback.format_exc(), get_url_data.value.decode())
+                logging.error(traceback.format_exc())
+                #self.log(Log.Error, "url_handle_error", None, traceback.format_exc(), get_url_data.value.decode())
             finally:
                 self.url_queue.commit_offset()
 
@@ -124,12 +126,12 @@ class Worker:
                         send_str = json.dumps(result)  # 这个结果的结构完全交给用户脚本
                         self.result_queue.produce(send_str.encode("utf-8"))
             except ParseError as pe:
-                # print("result error", traceback.format_exc())
+                logging.error(traceback.format_exc())
                 error_data = {"data": recv_obj, "error": traceback.format_exc()}
                 self.error_queue.produce(json.dumps(error_data).encode())
             except Exception as e:
-                print("result error", traceback.format_exc())
-                self.log(Log.Error, "result_handle_error", None, traceback.format_exc(), data.value.decode())
+                logging.error(traceback.format_exc())
+                #self.log(Log.Error, "result_handle_error", None, traceback.format_exc(), data.value.decode())
             finally:
                 self.result_queue.commit_offset()
 
@@ -163,11 +165,11 @@ class Worker:
             monitor.join()
             for i in parse_thread:
                 i.join()
-            print("线程安全停止")
+            logging.info("线程安全停止")
 
         self.thread = threading.Thread(target=true_run)
         self.thread.start()  # 防止阻塞主线程
-        print("主线程启动了一个Work子线程")
+        logging.info("主线程启动了一个Work子线程")
         return self.thread
 
     def join(self):

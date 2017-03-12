@@ -21,11 +21,17 @@ def singleton(class_):
 
 import logging
 
+handler = logging.FileHandler('/var/log/sea_spider/logging.log', "a",
+                              encoding="UTF-8")
 logging.basicConfig(level=logging.DEBUG,
                 format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                 datefmt='%a, %d %b %Y %H:%M:%S',
                 filename='/var/log/sea_spider/logging.log',
-                filemode='a',encoding="urf8")
+                filemode='a',
+                 handlers=handler
+                    )
+
+
 @singleton
 class Master:
     def __init__(self, config_path=None):

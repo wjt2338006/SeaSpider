@@ -26,7 +26,7 @@ handler = logging.FileHandler('/var/log/sea_spider/logging.log', "a",
 logging.basicConfig(level=logging.DEBUG,
                 format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                 datefmt='%a, %d %b %Y %H:%M:%S',
-                filename='/var/log/sea_spider/logging.log',
+                # filename='/var/log/sea_spider/logging.log',
                 filemode='a',
                  handlers=handler
                     )

@@ -2,19 +2,11 @@
   "kafka_log_host":"127.0.0.1:9092",
   "kafka_log_topic":"sea_spider_log",
 
-  "work_num": 1,
   "work_list": [
     {
-      "id": "9850ac",
+      "id": "spider_1",
       "name": "jd_man",
       "downloader": [
-        {
-          "type": "selenium",
-          "proxy": {
-            "host": "127.0.0.2:1080",
-            "type": "socks5"
-          }
-        },
         {
           "type": "selenium",
           "proxy": {
@@ -25,7 +17,41 @@
       ],
       "explain": "app.jd",
       "parse_thread": 1,
-      "after_get":"after_get",
+
+      "url_queue":{
+        "host":"127.0.0.1:9092",
+        "topic":"sea_jd_url_queue",
+        "consumer_group":"sea_jd_url_auto"
+      },
+      "result_queue":{
+        "host":"127.0.0.1:9092",
+        "topic":"sea_jd_result_queue",
+        "consumer_group":"sea_jd_result_auto"
+      },
+      "error_queue":{
+        "host":"127.0.0.1:9092",
+        "topic":"sea_jd_error_queue",
+        "consumer_group":"sea_jd_error_auto"
+      },
+      "final_queue":{
+        "host":"127.0.0.1:9092",
+        "topic":"sea_jd_final_queue"
+      }
+    },
+    {
+      "id": "spider_2",
+      "name": "jd_man",
+      "downloader": [
+        {
+          "type": "selenium",
+          "proxy": {
+            "host": "127.0.0.2:1080",
+            "type": "socks5"
+          }
+        }
+      ],
+      "explain": "app.jd",
+      "parse_thread": 1,
 
       "url_queue":{
         "host":"127.0.0.1:9092",

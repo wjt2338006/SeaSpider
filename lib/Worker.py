@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 import json
 import threading
 import traceback
@@ -108,7 +108,7 @@ class Worker:
             except Exception as e:
                 # print("url_handle_error",traceback.format_exc())
                 logging.error(traceback.format_exc())
-                #self.log(Log.Error, "url_handle_error", None, traceback.format_exc(), get_url_data.value.decode())
+                # self.log(Log.Error, "url_handle_error", None, traceback.format_exc(), get_url_data.value.decode())
             finally:
                 self.url_queue.commit_offset()
 
@@ -130,7 +130,7 @@ class Worker:
                 self.error_queue.produce(json.dumps(error_data).encode())
             except Exception as e:
                 logging.error(traceback.format_exc())
-                #self.log(Log.Error, "result_handle_error", None, traceback.format_exc(), data.value.decode())
+                # self.log(Log.Error, "result_handle_error", None, traceback.format_exc(), data.value.decode())
             finally:
                 self.result_queue.commit_offset()
 
@@ -149,7 +149,7 @@ class Worker:
 
             # 启动解析线程
             parse_thread = []
-            for i in range(0, self.config["parse_thread"]):
+            for i in range(0, self.config["parse_thread"]):  # 一些爬虫因为计算位置的问题是不能并发解析的
                 parse_func = getattr(module, "parse")
 
                 x = threading.Thread(target=lambda: self.handle_result(parse_func))

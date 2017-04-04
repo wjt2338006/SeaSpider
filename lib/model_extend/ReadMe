@@ -1,0 +1,18 @@
+查询方式，暂不支持having group
+
+{
+    '$field':['f1','f2','f3'...],
+    '$and': [
+                ["a","=","aValue"],
+                ["b","=","bValue"],
+                {"$and":[["c","cValue"],......]}
+            ],
+
+    "$link": [["key", "product_id", "db.table.item_product"],[] .......]
+    "$start":0,
+    $limit:0,
+    "$order":"id",
+    "$desc":true,
+    "$join":["left","table","a","b"] / ["table","a","b"]
+
+}

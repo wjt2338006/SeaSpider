@@ -149,52 +149,9 @@ TYPE_SINGLE_GOODS = 2
 def push_to_jd(data, final_queue):
     data["spider_time"] = time()
     data = json.dumps(data)
-    #logging.info("data will send",data)
     final_queue.produce(data.encode())
-    # isset = jd_data_store.find_one({"data_jd_id":data["data_jd_id"]})
-    # if isset:
-    #     jd_data_store.update({"data_jd_id":data["data_jd_id"]},data)
-    # else:
-    #     r = jd_data_store.insert(data)
-
-    # str = data["name"]
-    #
-    # with open("/home/jedi/output","w+") as f:
-    #     f.write(str)
-    # url = "http://laravel_template.com/api/input"
-    # sendData = {"param": {
-    #     'api': "pushJdData"
-    # }}
-    # sendData["param"]["args"] = {
-    #     'data_name': data["name"],
-    #     'data_price': data["price"],
-    #     'data_detail_url': data["detail_url"],
-    #     'data_jd_id': data["jd_id"],
-    #     'data_seller_name': data["seller_name"],
-    #     # 'data_order': data["order"]
-    # }
-    #
-    # r = requests.post(url, json=sendData)
-    # result = json.loads(r.text)
-    #
-    # if result["status"] == 200:
-    #     print('ok,i get some page')
-    #     sleep(1)
-    #     pass
-    # else:
-    #     print('server error')
 
 
-#
-# def after_get(dirver, worker):
-#     n = 0
-#     while n < 10:
-#         print('完成后点击了下一页')
-#         dirver.find_element_by_class_name('pn-next').click()
-#         sleep(5)
-#         worker.push_result(str(dirver.page_source), None)
-#         print("推入了结果")
-#         n += 1
 if __name__ == "__main__":
     try:
         push_to_jd({

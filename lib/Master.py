@@ -38,7 +38,7 @@ class Master:
 
         c = Config(config_path)
         self.config = c
-        self.worker_num = self.config.get('work_num')
+        self.worker_num = len(self.config.get('work_list'))
         self.worker_pool = []
         self.config_dict = {
             "kafka_log_host": self.config.get('kafka_log_host'),
@@ -51,9 +51,6 @@ class Master:
     def run(self):
         # 运行几个worker,让他们监听channel
         work_list = self.config.get('work_list')
-        if len(work_list) != self.worker_num:
-            raise Exception('error worker count')
-
         for i in range(0, self.worker_num):
             worker = Worker(work_list[i], Channel(),self)
             t = worker.run()
